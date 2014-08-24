@@ -1,22 +1,156 @@
 ---
-title: "DS Regression Project"
-author: "Stephen OConnell"
-date: "July 18, 2014"
+title: "Data Science Specialization: Regression Project"
+author: "Stephen O'Connell"
+date: "August 23, 2014"
 output: pdf_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Executive Summary
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+As editors of the most prestigious automobile magazine, Wagon Wheels, we are always looking for innovative analysis
+that challenges conventional thinking in the auto industry.  In the following analysis we attempt to challenge the conventional
+wisdom that a manual transmission provides better gas mileage than an automatic, considering all factors.  For this analysis we are using the will known mtcars data set provide by the base R Open Source Statistical package.  See Appendix A for a description of the data.
 
-```{r}
-summary(cars)
+Our analysis begins with an exploration of the data set used in the analysis.  From there we present a series models to provide a lens into the raw data in an effort to answer the primary question, which transmission is better for gas mileage, a standard or automatic.  No analysis is complete until we have summarized our findings.
+
+
+
+# Exploratory Analysis
+
+The exploratory plot in Appendix B. Pairs Plot shows the relationship between each variable in the data set.  From this plot we can see there appears to be a positive correlation, .60, between mileage (mpg) and transmission type (AM), the trend also appears to favor the manual transmission with regard to high mileage.  However, the number of cylinders (cyl), engine displacement (disp), and weight (wt) have positive correlation, each over .85.
+
+# Model Analysis
+
+An initial model of MPG using all the factors in the raw data does not yield any compiling evidence that transmission type influences the MPG.
+
+Using the correlation has a guide we created the following three models:
+
+1. Model.1 = mpg vs. am, A comparison of mpg to transmission type.  
+2. Model.2 = mpg vs. am + wt, A comparison of mileage (mpg) to transmission type and weight (wt)
+2. Model.3 = mpg vs. am + cyl + wt + disp + hp, A comparison of mileage (mpg) to transmission type, weight (wt), cylinders (cyl), engine displacement (disp), and horsepower (hp).
+
+See the Appendix for model details.
+
+In Model.1 we find that a manual transmission will add over 7 mpg compared to an automatic transmission, and the P value indicates this 
+relationship is significant.  However, as auto specialists we know that mileage (mpg) is influenced by other factors.  In Model.2 we compare the factor with the highest correlation, weight (wt), with transmission type, to mileage.  In this case we find that transmission 
+actually reverses sign when combined with weight (wt) and has no significance with regard to mileage (mpg), given its P value of .98.  
+
+However, without considering the elements with the highest correlation to mileage (mpg) our analysis is incomplete.  Our Model.3 includes the factors, weight (wt), cylinders (cyl), displacement (disp), and horsepower (hp).  In this case the manual transmission does indicate an increase in mileage (mpg), however, in this model the increase is not significant.
+
+# Conclusions / Summary
+
+So yes or no, does a manual transmission provide better mileage than an automatic.  Maybe.  There is some indication that a manual
+transmission will provide improved mileage, however, this increase is not significant.  In our analysis a manual transmission will add up to 1.8 miles per gallon vs an automatic transmission, all this being consisder.  The other factors of weight, horsepower, displacement and cylinders are bigger factors in determining mileage.
+
+# Appendix
+
+## A. Data Description:
+
+# Data
+
+##Description
+
+The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+
+## Usage
+
+mtcars
+
+## Format
+
+A data frame with 32 observations on 11 variables.
+
+<table>
+1.   mpg     Miles/(US) gallon
+2.	 cyl	 Number of cylinders
+3.	 disp	 Displacement (cu.in.)
+4.	 hp	     Gross horsepower
+5.	 drat	 Rear axle ratio
+6.	 wt	     Weight (lb/1000)
+7.	 qsec	 1/4 mile time
+8.	 vs	     V/S
+9.	 am	     Transmission (0 = automatic, 1 = manual)
+10.	 gear	 Number of forward gears
+11.	 carb	 Number of carburetors
+</table>
+
+
+## B. Pairs Plot
+```{r echo=FALSE}
+# PLOTS ALL VARIBALES AGAINST EACH OTHER, WITH CORRELATION, AND A SMOOTH
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
+{
+   usr <- par("usr"); on.exit(par(usr))
+	par(usr = c(0, 1, 0, 1))
+	r <- abs(cor(x, y))    # changes the font size
+	txt <- format(c(r, 0.123456789), digits=digits)[1]
+	txt <- paste(prefix, txt, sep="")
+	if(missing(cex.cor)) cex <- 0.8/strwidth(txt)
+	text(0.5, 0.5, txt, cex = cex * r)
+}
+
+pairs(mtcars,
+		lower.panel=function(...){
+			panel.smooth(...,lwd=3)}, upper.panel=panel.cor)
+
 ```
 
-You can also embed plots, for example:
 
-```{r, echo=FALSE}
-plot(cars)
+## C. Models
+
+### Model 1, mpg vs. transmission type:
+```{r echo=FALSE}
+
+my.mtcars <- mtcars
+
+my.mtcars$cyl <- factor(my.mtcars$cyl)
+my.mtcars$am[my.mtcars$am == 0] <-  "auto"
+my.mtcars$am[my.mtcars$am == 1] <-  "manual"
+
+my.mtcars$am <-  factor(my.mtcars$am, labels=c("auto", "manual"))
+
+model.1 <- lm(mpg ~ am, data=my.mtcars) 
+summary(model.1)
+
+op <- par(mfrow = c(2, 2))
+#plot(model.1)
+par(op)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+### Model 2, mpg vs. transmission type + wieght:
+```{r echo=FALSE}
+
+my.mtcars <- mtcars
+
+my.mtcars$cyl <- factor(my.mtcars$cyl)
+my.mtcars$am[my.mtcars$am == 0] <-  "auto"
+my.mtcars$am[my.mtcars$am == 1] <-  "manual"
+
+my.mtcars$am <-  factor(my.mtcars$am, labels=c("auto", "manual"))
+
+model.2 <- lm(mpg ~ am + wt, data=my.mtcars) 
+summary(model.2)
+
+op <- par(mfrow = c(2, 2))
+#plot(model.2)
+par(op)
+```
+
+### Model 3, mpg vs. transmission type + cylindars  + wieght + displacment + horsepower:
+```{r echo=FALSE}
+
+my.mtcars <- mtcars
+
+my.mtcars$cyl <- factor(my.mtcars$cyl)
+my.mtcars$am[my.mtcars$am == 0] <-  "auto"
+my.mtcars$am[my.mtcars$am == 1] <-  "manual"
+
+my.mtcars$am <-  factor(my.mtcars$am, labels=c("auto", "manual"))
+
+model.3 <- lm(mpg ~ am + cyl + wt + disp + hp, data=my.mtcars) 
+summary(model.3)
+
+op <- par(mfrow = c(2, 2))
+#plot(model.3)
+par(op)
+```
